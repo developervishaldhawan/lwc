@@ -21,7 +21,6 @@ import { logError } from '../shared/logger';
 import { VNode, VNodes } from '../3rdparty/snabbdom/types';
 import * as api from './api';
 import { RenderAPI } from './api';
-import { Context } from './context';
 import { SlotSet, VM, resetShadowRoot, runWithBoundaryProtection } from './vm';
 import { EmptyArray } from './utils';
 import { isTemplateRegistered, registerTemplate } from './secure-template';
@@ -47,8 +46,9 @@ export function isVMBeingRendered(vm: VM) {
 }
 
 export { registerTemplate };
+
 export interface Template {
-    (api: RenderAPI, cmp: object, slotSet: SlotSet, ctx: Context): VNodes;
+    (api: RenderAPI, cmp: object, slotSet: SlotSet, ctx: Record<string, any>): VNodes;
 
     /**
      * The stylesheet associated with the template.
@@ -178,7 +178,7 @@ export function evaluateTemplate(vm: VM, html: Template): Array<VNode | null> {
 
                     const { stylesheets, stylesheetTokens } = html;
                     if (isUndefined(stylesheets) || stylesheets.length === 0) {
-                        context.styleVNode = null;
+                        context.styleVNode = undefined;
                     } else if (!isUndefined(stylesheetTokens)) {
                         const { hostAttribute, shadowAttribute } = stylesheetTokens;
                         applyStyleAttributes(vm, hostAttribute, shadowAttribute);

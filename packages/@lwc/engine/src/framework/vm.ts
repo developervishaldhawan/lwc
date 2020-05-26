@@ -37,7 +37,6 @@ import { VNodes, VCustomElement, VNode } from '../3rdparty/snabbdom/types';
 import { Template } from './template';
 import { ComponentDef } from './def';
 import { ComponentInterface } from './component';
-import { Context } from './context';
 import {
     startMeasure,
     endMeasure,
@@ -63,6 +62,15 @@ export enum VMState {
     created,
     connected,
     disconnected,
+}
+
+export interface Context {
+    hostAttribute: string | undefined;
+    shadowAttribute: string | undefined;
+    styleVNode: VNode | undefined;
+    tplCache: Record<string, any> | undefined;
+    wiredConnecting: Array<() => {}>;
+    wiredDisconnecting: Array<() => {}>;
 }
 
 export interface VM {
@@ -99,7 +107,7 @@ export interface VM {
     /** The shadow DOM mode. */
     mode: ShadowDomMode;
     /** The template method returning the VDOM tree. */
-    cmpTemplate?: Template;
+    cmpTemplate: Template | undefined;
     /** The component instance. */
     component: ComponentInterface;
     /** The custom element shadow root. */
@@ -231,18 +239,25 @@ export function createVM(
         children: EmptyArray,
         aChildren: EmptyArray,
         velements: EmptyArray,
-        context: create(null),
         cmpProps: create(null),
         cmpFields: create(null),
         cmpSlots: create(null),
         oar: create(null),
-        callHook,
-        setHook,
-        getHook,
         cmpTemplate: undefined,
         tro: undefined!, // Set synchronously after the VM creation.
         component: undefined!, // Set synchronously by the LightningElement constructor.
         cmpRoot: undefined!, // Set synchronously by the LightningElement constructor.
+        context: {
+            hostAttribute: undefined,
+            shadowAttribute: undefined,
+            tplCache: undefined,
+            styleVNode: undefined,
+            wiredConnecting: [],
+            wiredDisconnecting: [],
+        },
+        callHook,
+        setHook,
+        getHook,
     };
 
     vm.tro = getTemplateReactiveObserver(vm);

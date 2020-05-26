@@ -5,12 +5,12 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 import { assert, create, emptyString, forEach, isArray, isUndefined } from '@lwc/shared';
-import { VNode } from '../3rdparty/snabbdom/types';
 
 import * as api from './api';
 import { EmptyArray, useSyntheticShadow } from './utils';
-import { VM } from './vm';
 import { removeAttribute, setAttribute } from '../../dom/src/env/element';
+import { VM } from './vm';
+import { VNode } from '../3rdparty/snabbdom/types';
 /**
  * Function producing style based on a host and a shadow selector. This function is invoked by
  * the engine with different values depending on the mode that the component is running on.
@@ -117,7 +117,7 @@ export function evaluateCSS(
     stylesheets: StylesheetFactory[],
     hostAttribute: string,
     shadowAttribute: string
-): VNode | null {
+): VNode | undefined {
     if (process.env.NODE_ENV !== 'production') {
         assert.isTrue(isArray(stylesheets), `Invalid stylesheets.`);
     }
@@ -130,7 +130,7 @@ export function evaluateCSS(
             insertGlobalStyle(textContent);
         });
 
-        return null;
+        return undefined;
     } else {
         // Native shadow in place, we need to act accordingly by using the `:host` selector, and an
         // empty shadow selector since it is not really needed.
