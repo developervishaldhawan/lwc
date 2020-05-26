@@ -28,7 +28,7 @@ import {
     markComponentAsDirty,
     getTemplateReactiveObserver,
 } from './component';
-import { addCallbackToNextTick, EmptyArray } from './utils';
+import { addCallbackToNextTick, EmptyArray, EmptyObject } from './utils';
 import { invokeServiceHook, Services } from './services';
 import { invokeComponentCallback, invokeComponentRenderedCallback } from './invoker';
 import { ShadowRootInnerHTMLSetter } from '../../dom/src/env/dom';
@@ -65,12 +65,19 @@ export enum VMState {
 }
 
 export interface Context {
+    /** The attribute name used on the host element to scope the style. */
     hostAttribute: string | undefined;
+    /** The attribute name used on all the elements rendered in the shadow tree to scope the style. */
     shadowAttribute: string | undefined;
-    styleVNode: VNode | undefined;
-    tplCache: Record<string, any> | undefined;
-    wiredConnecting: Array<() => {}>;
-    wiredDisconnecting: Array<() => {}>;
+    /** The VNode injected in all the shadow trees to apply the associated component stylesheets. */
+    styleVNode: VNode | null;
+    /** Object used by the template function to store information that can be reused between
+     *  different render cycle of the same template. */
+    tplCache: Record<string, any>;
+    /** List of wire hooks that are invoked when the component gets connected. */
+    wiredConnecting: Array<() => void>;
+    /** List of wire hooks that are invoked when the component gets disconnected. */
+    wiredDisconnecting: Array<() => void>;
 }
 
 export interface VM {
@@ -107,7 +114,7 @@ export interface VM {
     /** The shadow DOM mode. */
     mode: ShadowDomMode;
     /** The template method returning the VDOM tree. */
-    cmpTemplate: Template | undefined;
+    cmpTemplate: Template | null;
     /** The component instance. */
     component: ComponentInterface;
     /** The custom element shadow root. */
@@ -243,18 +250,21 @@ export function createVM(
         cmpFields: create(null),
         cmpSlots: create(null),
         oar: create(null),
-        cmpTemplate: undefined,
-        tro: undefined!, // Set synchronously after the VM creation.
-        component: undefined!, // Set synchronously by the LightningElement constructor.
-        cmpRoot: undefined!, // Set synchronously by the LightningElement constructor.
+        cmpTemplate: null,
+
         context: {
             hostAttribute: undefined,
             shadowAttribute: undefined,
-            tplCache: undefined,
-            styleVNode: undefined,
-            wiredConnecting: [],
-            wiredDisconnecting: [],
+            styleVNode: null,
+            tplCache: EmptyObject,
+            wiredConnecting: EmptyArray,
+            wiredDisconnecting: EmptyArray,
         },
+
+        tro: null!, // Set synchronously after the VM creation.
+        component: null!, // Set synchronously by the LightningElement constructor.
+        cmpRoot: null!, // Set synchronously by the LightningElement constructor.
+
         callHook,
         setHook,
         getHook,
@@ -382,7 +392,7 @@ function flushRehydrationQueue() {
             `If rehydrateQueue was scheduled, it is because there must be at least one VM on this pending queue instead of ${rehydrateQueue}.`
         );
     }
-    const vms: VM[] = rehydrateQueue.sort((a: VM, b: VM): number => a.idx - b.idx);
+    const vms = rehydrateQueue.sort((a: VM, b: VM): number => a.idx - b.idx);
     rehydrateQueue = []; // reset to a new queue
     for (let i = 0, len = vms.length; i < len; i += 1) {
         const vm = vms[i];

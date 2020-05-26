@@ -178,7 +178,7 @@ export function evaluateTemplate(vm: VM, html: Template): Array<VNode | null> {
 
                     const { stylesheets, stylesheetTokens } = html;
                     if (isUndefined(stylesheets) || stylesheets.length === 0) {
-                        context.styleVNode = undefined;
+                        context.styleVNode = null;
                     } else if (!isUndefined(stylesheetTokens)) {
                         const { hostAttribute, shadowAttribute } = stylesheetTokens;
                         applyStyleAttributes(vm, hostAttribute, shadowAttribute);

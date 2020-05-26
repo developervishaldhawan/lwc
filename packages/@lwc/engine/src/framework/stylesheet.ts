@@ -117,7 +117,7 @@ export function evaluateCSS(
     stylesheets: StylesheetFactory[],
     hostAttribute: string,
     shadowAttribute: string
-): VNode | undefined {
+): VNode | null {
     if (process.env.NODE_ENV !== 'production') {
         assert.isTrue(isArray(stylesheets), `Invalid stylesheets.`);
     }
@@ -130,7 +130,7 @@ export function evaluateCSS(
             insertGlobalStyle(textContent);
         });
 
-        return undefined;
+        return null;
     } else {
         // Native shadow in place, we need to act accordingly by using the `:host` selector, and an
         // empty shadow selector since it is not really needed.
