@@ -62,8 +62,8 @@ export function invokeServiceHook(vm: VM, cbs: ServiceCallback[]) {
             `Optimize invokeServiceHook() to be invoked only when needed`
         );
     }
-    const { component, data, def, context } = vm;
+    const { component, def, context } = vm;
     for (let i = 0, len = cbs.length; i < len; ++i) {
-        cbs[i].call(undefined, component, data, def, context);
+        cbs[i].call(undefined, component, {}, def, context);
     }
 }

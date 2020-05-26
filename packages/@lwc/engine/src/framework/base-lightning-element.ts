@@ -25,7 +25,6 @@ import { HTMLElementOriginalDescriptors } from './html-properties';
 import {
     ComponentInterface,
     getWrappedComponentsListener,
-    getTemplateReactiveObserver,
 } from './component';
 import { vmBeingConstructed, isBeingConstructed, isInvokingRender } from './invoker';
 import { associateVM, getAssociatedVM, VM } from './vm';
@@ -236,7 +235,7 @@ export interface LightningElement extends HTMLElementTheGoodParts, AccessibleEle
  * This class is the base class for any LWC element.
  * Some elements directly extends this class, others implement it via inheritance.
  **/
-function BaseLightningElementConstructor(this: LightningElement) {
+function BaseLightningElementConstructor(this: LightningElement): LightningElement {
     // This should be as performant as possible, while any initialization should be done lazily
     if (isNull(vmBeingConstructed)) {
         throw new ReferenceError('Illegal constructor');
@@ -247,16 +246,24 @@ function BaseLightningElementConstructor(this: LightningElement) {
             `Component creation requires a DOM element to be associated to ${vmBeingConstructed}.`
         );
     }
-    const vm = vmBeingConstructed as VM;
+
+    const vm = vmBeingConstructed;
     const {
         elm,
         mode,
         def: { ctor },
     } = vm;
+
     const component = this;
-    vm.component = component;
-    vm.tro = getTemplateReactiveObserver(vm);
-    vm.oar = create(null);
+    const cmpRoot = elm.attachShadow({
+        mode,
+        delegatesFocus: !!ctor.delegatesFocus,
+        '$$lwc-synthetic-mode$$': true,
+    } as any);
+
+    vm.component = this;
+    vm.cmpRoot = cmpRoot;
+
     // interaction hooks
     // We are intentionally hiding this argument from the formal API of LWCElement because
     // we don't want folks to know about it just yet.
@@ -266,25 +273,20 @@ function BaseLightningElementConstructor(this: LightningElement) {
         vm.setHook = setHook;
         vm.getHook = getHook;
     }
-    // attaching the shadowRoot
-    const shadowRootOptions = {
-        mode,
-        delegatesFocus: !!ctor.delegatesFocus,
-        '$$lwc-synthetic-mode$$': true,
-    };
-    const cmpRoot = elm.attachShadow(shadowRootOptions);
-    // linking elm, shadow root and component with the VM
+
+    // Linking elm, shadow root and component with the VM.
     associateVM(component, vm);
     associateVM(cmpRoot, vm);
     associateVM(elm, vm);
-    // VM is now initialized
-    vm.cmpRoot = cmpRoot;
+
+    // Adding extra guard rails in DEV mode.
     if (process.env.NODE_ENV !== 'production') {
         patchCustomElementWithRestrictions(elm);
         patchComponentWithRestrictions(component);
         patchShadowRootWithRestrictions(cmpRoot);
     }
-    return this as LightningElement;
+
+    return this;
 }
 
 BaseLightningElementConstructor.prototype = {

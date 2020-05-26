@@ -6,9 +6,9 @@
  */
 import { isNull, ArrayJoin, ArrayPush, StringToLowerCase } from '@lwc/shared';
 
-import { UninitializedVM } from '../framework/vm';
+import { VM } from '../framework/vm';
 
-export function getComponentTag(vm: UninitializedVM): string {
+export function getComponentTag(vm: VM): string {
     // Element.prototype.tagName getter might be poisoned. We need to use a try/catch to protect the
     // engine internal when accessing the tagName property.
     try {
@@ -19,7 +19,7 @@ export function getComponentTag(vm: UninitializedVM): string {
 }
 
 // TODO [#1695]: Unify getComponentStack and getErrorComponentStack
-export function getComponentStack(vm: UninitializedVM): string {
+export function getComponentStack(vm: VM): string {
     const stack: string[] = [];
     let prefix = '';
 
@@ -33,10 +33,10 @@ export function getComponentStack(vm: UninitializedVM): string {
     return ArrayJoin.call(stack, '\n');
 }
 
-export function getErrorComponentStack(vm: UninitializedVM): string {
+export function getErrorComponentStack(vm: VM): string {
     const wcStack: string[] = [];
 
-    let currentVm: UninitializedVM | null = vm;
+    let currentVm: VM | null = vm;
     while (!isNull(currentVm)) {
         ArrayPush.call(wcStack, getComponentTag(currentVm));
         currentVm = currentVm.owner;

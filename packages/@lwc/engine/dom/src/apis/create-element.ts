@@ -118,7 +118,6 @@ export function createElement(
     createVM(element, def, {
         mode: options.mode !== 'closed' ? 'open' : 'closed',
         owner: null,
-        isRoot: true,
     });
 
     setHiddenField(element, ConnectingSlot, connectRootElement);
