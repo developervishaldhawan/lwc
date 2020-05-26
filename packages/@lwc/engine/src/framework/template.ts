@@ -151,17 +151,19 @@ export function evaluateTemplate(vm: VM, html: Template): Array<VNode | null> {
             // job
             const { component, context, cmpSlots, cmpTemplate, tro } = vm;
             tro.observe(() => {
-                // reset the cache memoizer for template when needed
+                // Reset the cache memoizer for template when needed.
                 if (html !== cmpTemplate) {
-                    // perf opt: do not reset the shadow root during the first rendering (there is nothing to reset)
-                    if (!isUndefined(cmpTemplate)) {
-                        // It is important to reset the content to avoid reusing similar elements generated from a different
-                        // template, because they could have similar IDs, and snabbdom just rely on the IDs.
+                    // Perf opt: do not reset the shadow root during the first rendering (there is
+                    // nothing to reset).
+                    if (!isNull(cmpTemplate)) {
+                        // It is important to reset the content to avoid reusing similar elements
+                        // generated from a different template, because they could have similar IDs,
+                        // and snabbdom just rely on the IDs.
                         resetShadowRoot(vm);
                     }
 
-                    // Check that the template was built by the compiler
-                    if (isUndefined(html) || !isTemplateRegistered(html)) {
+                    // Check that the template was built by the compiler.
+                    if (isNull(html) || !isTemplateRegistered(html)) {
                         throw new TypeError(
                             `Invalid template returned by the render() method on ${vm}. It must return an imported template (e.g.: \`import html from "./${
                                 vm.def.name
