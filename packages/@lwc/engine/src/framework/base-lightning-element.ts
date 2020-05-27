@@ -27,7 +27,7 @@ import {
     getWrappedComponentsListener,
 } from './component';
 import { vmBeingConstructed, isBeingConstructed, isInvokingRender } from './invoker';
-import { associateVM, getAssociatedVM, VM } from './vm';
+import { associateVM, getAssociatedVM } from './vm';
 import { componentValueMutated, componentValueObserved } from './mutation-tracker';
 import {
     patchComponentWithRestrictions,
@@ -122,12 +122,6 @@ function createBridgeToElementDescriptor(
 
 function getLinkedElement(cmp: ComponentInterface): HTMLElement {
     return getAssociatedVM(cmp).elm;
-}
-
-interface ComponentHooks {
-    callHook: VM['callHook'];
-    setHook: VM['setHook'];
-    getHook: VM['getHook'];
 }
 
 export interface LightningElementConstructor {
@@ -264,11 +258,12 @@ function BaseLightningElementConstructor(this: LightningElement): LightningEleme
     vm.component = this;
     vm.cmpRoot = cmpRoot;
 
-    // interaction hooks
-    // We are intentionally hiding this argument from the formal API of LWCElement because
-    // we don't want folks to know about it just yet.
+    // Locker hooks assignment. When the LWC engine is evaluated along Locker, Locker intercepts all
+    // the new component creation and pass hooks to instrument all the component interactions We are
+    // intentionally hiding this argument from the formal API of LWCElement because we don't want
+    // folks to know about it just yet.
     if (arguments.length === 1) {
-        const { callHook, setHook, getHook } = arguments[0] as ComponentHooks;
+        const { callHook, setHook, getHook } = arguments[0];
         vm.callHook = callHook;
         vm.setHook = setHook;
         vm.getHook = getHook;

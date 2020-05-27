@@ -124,15 +124,19 @@ export interface VM {
     /** The accessor reactive observers. Is only used when the ENABLE_REACTIVE_SETTER feature flag
      *  is enabled. */
     oar: Record<PropertyKey, AccessorReactiveObserver>;
-
-    /** TO BE REMOVED. */
+    /** Hook invoked whenever a property is accessed on the host element. This hook is used by
+     *  Locker only. */
+    setHook: (cmp: ComponentInterface, prop: PropertyKey, newValue: any) => void;
+    /** Hook invoked whenever a property is set on the host element. This hook is used by Locker
+     *  only. */
+    getHook: (cmp: ComponentInterface, prop: PropertyKey) => any;
+    /** Hook invoked whenever a method is called on the component (life-cycle hooks, public
+     *  properties and event handlers). This hook is used by Locker. */
     callHook: (
         cmp: ComponentInterface | undefined,
         fn: (...args: any[]) => any,
         args?: any[]
     ) => any;
-    setHook: (cmp: ComponentInterface, prop: PropertyKey, newValue: any) => void;
-    getHook: (cmp: ComponentInterface, prop: PropertyKey) => any;
 }
 
 type VMAssociable = Node | LightningElement | ComponentInterface;
