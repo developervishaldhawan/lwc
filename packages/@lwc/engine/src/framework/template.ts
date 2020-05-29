@@ -13,7 +13,6 @@ import {
     isArray,
     isFunction,
     isNull,
-    isObject,
     isUndefined,
     toString,
 } from '@lwc/shared';
@@ -75,14 +74,13 @@ export interface Template {
         shadowAttribute: string;
     };
 }
-const EmptySlots: SlotSet = create(null);
 
 function validateSlots(vm: VM, html: any) {
     if (process.env.NODE_ENV === 'production') {
         // this method should never leak to prod
         throw new ReferenceError();
     }
-    const { cmpSlots = EmptySlots } = vm;
+    const { cmpSlots } = vm;
     const { slots = EmptyArray } = html;
     for (const slotName in cmpSlots) {
         // eslint-disable-next-line lwc-internal/no-production-assert
@@ -201,10 +199,6 @@ export function evaluateTemplate(vm: VM, html: Template): Array<VNode | null> {
                 }
 
                 if (process.env.NODE_ENV !== 'production') {
-                    assert.isTrue(
-                        isObject(context.tplCache),
-                        `vm.context.tplCache must be an object associated to ${cmpTemplate}.`
-                    );
                     // validating slots in every rendering since the allocated content might change over time
                     validateSlots(vm, html);
                 }
@@ -214,7 +208,7 @@ export function evaluateTemplate(vm: VM, html: Template): Array<VNode | null> {
                 // Set the global flag that template is being updated
                 isUpdatingTemplate = true;
 
-                vnodes = html.call(undefined, api, component, cmpSlots, context.tplCache!);
+                vnodes = html.call(undefined, api, component, cmpSlots, context.tplCache);
                 const { styleVNode } = context;
                 if (!isNull(styleVNode)) {
                     ArrayUnshift.call(vnodes, styleVNode);
