@@ -22,10 +22,7 @@ import {
     isObject,
 } from '@lwc/shared';
 import { HTMLElementOriginalDescriptors } from './html-properties';
-import {
-    ComponentInterface,
-    getWrappedComponentsListener,
-} from './component';
+import { ComponentInterface, getWrappedComponentsListener } from './component';
 import { vmBeingConstructed, isBeingConstructed, isInvokingRender } from './invoker';
 import { associateVM, getAssociatedVM } from './vm';
 import { componentValueMutated, componentValueObserved } from './mutation-tracker';
